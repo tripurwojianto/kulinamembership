@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tripurwojianto",
+  "main": "_worker.js",
+  "compatibility_date": "2025-09-27",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "public",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://prodig.zhost.digital,https://www.prodig.zhost.digital",
+    "APP_GAS_URL": "https://script.google.com/macros/s/AKfycbwVK3o1GJV55am9Jpm1VwT0Q6MSkzwlaZuJcdnsYp54EGTqV8TrZfHf--Ab3cCq6lOm/exec",
+    "MOOTA_GAS_URL": "https://script.google.com/macros/s/AKfycbwVK3o1GJV55am9Jpm1VwT0Q6MSkzwlaZuJcdnsYp54EGTqV8TrZfHf--Ab3cCq6lOm/exec",
+    "MOOTA_TOKEN": "TOKEN MOOTA"
+  }
+}
