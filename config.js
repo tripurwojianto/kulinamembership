@@ -1,65 +1,55 @@
 /**
  * ============================================
- * config.js — Secure Config Loader v2.0
- * AES-256-CBC Encrypted Configuration
+ * config.js — Secure Config Loader v2.1
+ * Fixed for kulina.biz.id
  * ============================================
- * 
- * GAS URL disimpan dalam format terenkripsi.
- * Dekripsi dilakukan saat runtime menggunakan
- * Web Crypto API dengan domain-locking.
  */
 (function () {
     'use strict';
 
-    // --- ENCRYPTED PAYLOAD ---
-    // Format: { iv: hex, salt: hex, data: base64 }
-    // Dienkripsi dengan AES-256-CBC, key di-derive via PBKDF2
     var _0xCFG = {
         v: 2,
-        // Encoded + split GAS URL (XOR obfuscated, not plain text)
         _k: [104, 116, 116, 112, 115, 58, 47, 47, 115, 99, 114, 105, 112, 116, 46, 103, 111, 111, 103, 108, 101, 46, 99, 111, 109, 47, 109, 97, 99, 114, 111, 115, 47, 115, 47],
-        _d: 'QUtmeWNid3FkTW95azZQaUR3M2VscGYwbHprNUJxVkVucGlJLXkwS2pWYVZrVl9uQ1IxQWY3U1hxdnZYOER0bVRocWY4bzgtL2V4ZWM=',
-        _h: '6a1f2c3d'  // integrity hash fragment
+        _d: 'QUtteWNid3FkTW95azZQaUR3M2VscGYwbHprNUJxVkVucGlJLXkwS2pWYVZrVl9uQ1IxQWY3U1hxdnZYOER0bVRocWY4bzgtL2V4ZWM=',
+        _h: '6a1f2c3d'
     };
 
-    // --- ANTI-TAMPERING ---
+    // --- DOMAIN VERIFICATION ---
+    // Membaca ALLOWED_DOMAINS dari SITE_CONFIG (site_config.js)
+    // TIDAK ada hardcode domain di sini — semua dari site_config.js
     function _verify() {
         try {
-            // Check if SITE_CONFIG is loaded (from site.config.js)
             if (typeof SITE_CONFIG === 'undefined' || !SITE_CONFIG) {
                 console.error('[Config] SITE_CONFIG belum dimuat. Pastikan site.config.js di-load sebelum config.js.');
-                console.error('[Config] Tambahkan: <script src="/site.config.js"></script> sebelum <script src="/config.js">');
                 return false;
             }
 
-            // Validate SITE_CONFIG structure
             if (!SITE_CONFIG.ALLOWED_DOMAINS || !Array.isArray(SITE_CONFIG.ALLOWED_DOMAINS) || SITE_CONFIG.ALLOWED_DOMAINS.length === 0) {
-                console.error('[Config] SITE_CONFIG.ALLOWED_DOMAINS kosong atau tidak valid. Jalankan: node setup.js');
+                console.error('[Config] SITE_CONFIG.ALLOWED_DOMAINS kosong atau tidak valid.');
                 return false;
             }
 
-            // Domain lock — hanya bekerja di domain yang authorized
             var h = location.hostname;
 
-            // Build allowed list from SITE_CONFIG
+            // Build allowed list dari SITE_CONFIG saja (tidak ada hardcode)
             var allowed = SITE_CONFIG.ALLOWED_DOMAINS.slice();
 
-            // Add localhost/dev entries if enabled
+            // Tambah localhost jika diizinkan
             if (SITE_CONFIG.ALLOW_LOCALHOST !== false) {
                 allowed.push('localhost');
                 allowed.push('127.0.0.1');
-                allowed.push('');  // file:// protocol (local dev)
+                allowed.push('');
             }
 
-            // Check exact match
+            // Cek exact match
             var isAllowed = allowed.indexOf(h) !== -1;
 
-            // Check Cloudflare Pages preview
+            // Cek Cloudflare Pages preview (*.pages.dev)
             if (!isAllowed && SITE_CONFIG.ALLOW_PAGES_DEV !== false) {
                 isAllowed = h.indexOf('.pages.dev') !== -1;
             }
 
-            // Check subdomain suffixes
+            // Cek subdomain suffix (misalnya .kulina.biz.id)
             if (!isAllowed && SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES && Array.isArray(SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES)) {
                 for (var i = 0; i < SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES.length; i++) {
                     if (h.endsWith(SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES[i])) {
@@ -74,32 +64,27 @@
                 console.error('[Config] Domain yang diizinkan: ' + allowed.join(', '));
                 return false;
             }
+
             return true;
         } catch (e) {
             return false;
         }
     }
 
-    // --- DECODE ---
+    // --- DECODE GAS URL ---
     function _decode() {
         if (!_verify()) return null;
 
         try {
-            // Reconstruct from char codes (prefix)
             var prefix = '';
             for (var i = 0; i < _0xCFG._k.length; i++) {
                 prefix += String.fromCharCode(_0xCFG._k[i]);
             }
 
-            // Decode Base64 path
             var path = atob(_0xCFG._d);
-
-            // Combine
             var url = prefix + path;
 
-            // Integrity check — verify the URL looks valid
-            if (url.indexOf('script.google.com') === -1 ||
-                url.indexOf('/exec') === -1) {
+            if (url.indexOf('script.google.com') === -1 || url.indexOf('/exec') === -1) {
                 console.error('[Config] Integrity check failed');
                 return null;
             }
@@ -111,20 +96,13 @@
         }
     }
 
-    // --- EXPOSE ---
+    // --- EXPOSE SCRIPT_URL ---
     var _url = _decode();
     if (_url) {
-        // Resolve API endpoint first (prefer same-origin /api in production)
+        // PERBAIKAN UTAMA: SCRIPT_URL selalu langsung ke GAS URL
+        // Tidak redirect ke /api karena tidak ada Cloudflare Worker proxy
         var _api = _url;
-        try {
-            var _proto = location.protocol;
-            var _host = location.hostname;
-            if (_proto === 'https:' || _proto === 'http:') {
-                if (_host !== 'localhost' && _host !== '127.0.0.1') _api = '/api';
-            }
-        } catch (e) { }
 
-        // Expose GAS_URL for explicit direct fallback/debug (hidden)
         try {
             Object.defineProperty(window, 'GAS_URL', {
                 value: _url,
@@ -136,18 +114,17 @@
             window.GAS_URL = _url;
         }
 
-        // SCRIPT_URL now follows API_URL so all pages use single edge entrypoint in production
         try {
             Object.defineProperty(window, 'SCRIPT_URL', {
                 value: _api,
                 writable: false,
                 configurable: false,
-                enumerable: false  // Hidden from Object.keys(window)
+                enumerable: false
             });
         } catch (e) {
-            // Fallback for older browsers
             window.SCRIPT_URL = _api;
         }
+
         try {
             Object.defineProperty(window, 'API_URL', {
                 value: _api,
@@ -158,6 +135,8 @@
         } catch (e) {
             try { window.API_URL = _api; } catch (e2) { }
         }
+
+        // --- FETCH WRAPPER (cache + retry) ---
         try {
             if (!window.__CEPAT_FETCH_WRAPPED__ && typeof window.fetch === 'function') {
                 var _nativeFetch = window.fetch.bind(window);
@@ -446,6 +425,8 @@
                     }
                     return _nativeFetch(input, init);
                 };
+
+                // --- BATCH API ---
                 try {
                     window.CEPAT_API = window.CEPAT_API || {};
                     window.CEPAT_API.batch = async function (requests, options) {
@@ -488,6 +469,8 @@
                         return payload;
                     };
                 } catch (e) { }
+
+                // --- PUBLIC CACHE STATE ---
                 try {
                     var _publicCacheStateKey = 'cepat_public_cache_state_v1';
                     var _publicCacheStateMaxAge = 5 * 1000;
@@ -581,6 +564,5 @@
         console.error('[Config] Failed to initialize configuration');
     }
 
-    // --- CLEANUP: Remove decode function references ---
     _0xCFG = null;
 })();
