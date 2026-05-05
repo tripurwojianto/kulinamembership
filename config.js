@@ -9,14 +9,14 @@
 
     var _0xCFG = {
         v: 2,
-        _k: [104, 116, 116, 112, 115, 58, 47, 47, 115, 99, 114, 105, 112, 116, 46, 103, 111, 111, 103, 108, 101, 46, 99, 111, 109, 47, 109, 97, 99, 114, 111, 115, 47, 115, 47],
-        _d: 'QUtteWNid3FkTW95azZQaUR3M2VscGYwbHprNUJxVkVucGlJLXkwS2pWYVZrVl9uQ1IxQWY3U1hxdnZYOER0bVRocWY4bzgtL2V4ZWM=',
+        _k: [104,116,116,112,115,58,47,47,115,99,114,105,112,116,46,103,111,111,103,108,101,46,99,111,109,47,109,97,99,114,111,115,47,115,47],
+        _d: 'QUtmeWNieUhld1JuN3BWZzVZNV94WEhtb1hMbXdidG1NbmdaS1dvOTNCMVFZQm5UaXZBOXROVWE3UU1oN01nYUJ1VndhV2dDL2V4ZWM=',
         _h: '6a1f2c3d'
     };
 
     // --- DOMAIN VERIFICATION ---
     // Membaca ALLOWED_DOMAINS dari SITE_CONFIG (site_config.js)
-    // TIDAK ada hardcode domain di sini — semua dari site_config.js
+    // Tidak ada hardcode domain di sini
     function _verify() {
         try {
             if (typeof SITE_CONFIG === 'undefined' || !SITE_CONFIG) {
@@ -31,7 +31,7 @@
 
             var h = location.hostname;
 
-            // Build allowed list dari SITE_CONFIG saja (tidak ada hardcode)
+            // Build allowed list dari SITE_CONFIG saja
             var allowed = SITE_CONFIG.ALLOWED_DOMAINS.slice();
 
             // Tambah localhost jika diizinkan
@@ -49,7 +49,7 @@
                 isAllowed = h.indexOf('.pages.dev') !== -1;
             }
 
-            // Cek subdomain suffix (misalnya .kulina.biz.id)
+            // Cek subdomain suffix (contoh: .kulina.biz.id)
             if (!isAllowed && SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES && Array.isArray(SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES)) {
                 for (var i = 0; i < SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES.length; i++) {
                     if (h.endsWith(SITE_CONFIG.ALLOWED_SUBDOMAIN_SUFFIXES[i])) {
@@ -99,42 +99,26 @@
     // --- EXPOSE SCRIPT_URL ---
     var _url = _decode();
     if (_url) {
-        // PERBAIKAN UTAMA: SCRIPT_URL selalu langsung ke GAS URL
-        // Tidak redirect ke /api karena tidak ada Cloudflare Worker proxy
+        // SCRIPT_URL langsung ke GAS — tidak redirect ke /api
         var _api = _url;
 
         try {
             Object.defineProperty(window, 'GAS_URL', {
-                value: _url,
-                writable: false,
-                configurable: false,
-                enumerable: false
+                value: _url, writable: false, configurable: false, enumerable: false
             });
-        } catch (e) {
-            window.GAS_URL = _url;
-        }
+        } catch (e) { window.GAS_URL = _url; }
 
         try {
             Object.defineProperty(window, 'SCRIPT_URL', {
-                value: _api,
-                writable: false,
-                configurable: false,
-                enumerable: false
+                value: _api, writable: false, configurable: false, enumerable: false
             });
-        } catch (e) {
-            window.SCRIPT_URL = _api;
-        }
+        } catch (e) { window.SCRIPT_URL = _api; }
 
         try {
             Object.defineProperty(window, 'API_URL', {
-                value: _api,
-                writable: false,
-                configurable: false,
-                enumerable: false
+                value: _api, writable: false, configurable: false, enumerable: false
             });
-        } catch (e) {
-            try { window.API_URL = _api; } catch (e2) { }
-        }
+        } catch (e) { try { window.API_URL = _api; } catch (e2) { } }
 
         // --- FETCH WRAPPER (cache + retry) ---
         try {
@@ -162,15 +146,9 @@
                     _actionTtl[key] = Number((_actionMeta[key] && _actionMeta[key].ttl) || 0);
                 });
                 var _fetchStats = {
-                    network_requests: 0,
-                    memory_cache_hits: 0,
-                    storage_cache_hits: 0,
-                    deduped_requests: 0,
-                    retry_replays: 0,
-                    cache_invalidations: 0,
-                    saved_requests: 0,
-                    last_network_at: 0,
-                    by_action: {}
+                    network_requests: 0, memory_cache_hits: 0, storage_cache_hits: 0,
+                    deduped_requests: 0, retry_replays: 0, cache_invalidations: 0,
+                    saved_requests: 0, last_network_at: 0, by_action: {}
                 };
                 var _markStat = function (name, action) {
                     try {
@@ -186,9 +164,7 @@
                 };
                 try {
                     window.__CEPAT_FETCH_STATS__ = _fetchStats;
-                    window.__CEPAT_GET_FETCH_STATS__ = function () {
-                        return JSON.parse(JSON.stringify(_fetchStats));
-                    };
+                    window.__CEPAT_GET_FETCH_STATS__ = function () { return JSON.parse(JSON.stringify(_fetchStats)); };
                 } catch (e) { }
                 var _getUrl = function (input) {
                     try {
@@ -205,11 +181,8 @@
                 };
                 var _parseAction = function (init) {
                     try {
-                        if (!init || !init.body) return '';
-                        if (typeof init.body !== 'string') return '';
-                        var t = init.body.trim();
-                        if (!t) return '';
-                        var obj = JSON.parse(t);
+                        if (!init || !init.body || typeof init.body !== 'string') return '';
+                        var obj = JSON.parse(init.body.trim());
                         if (obj && typeof obj.action === 'string') return obj.action;
                     } catch (e) { }
                     return '';
@@ -218,40 +191,34 @@
                     return status === 408 || status === 429 || status === 500 || status === 502 || status === 503 || status === 504 || status === 522 || status === 524;
                 };
                 var _isRetryableRequest = function (input, init) {
-                    var method = (init && init.method ? String(init.method) : (input && input.method ? String(input.method) : 'GET')).toUpperCase();
+                    var method = (init && init.method ? String(init.method) : 'GET').toUpperCase();
                     if (method === 'GET' || method === 'HEAD') return true;
                     if (method !== 'POST') return false;
                     if (input && typeof Request !== 'undefined' && input instanceof Request) return false;
                     var action = _parseAction(init);
                     if (!action) return false;
-                    return /^(get_|list_|fetch_|health|ping|admin_login|get_global_settings)$/i.test(action);
+                    return /^(get_|list_|fetch_|health|ping|admin_login|get_global_settings)/i.test(action);
                 };
                 var _isCacheableAction = function (action) {
-                    if (!action) return false;
-                    return Object.prototype.hasOwnProperty.call(_actionTtl, action);
+                    return !!action && Object.prototype.hasOwnProperty.call(_actionTtl, action);
                 };
                 var _isMutatingAction = function (action) {
-                    if (!action) return false;
-                    return !_isCacheableAction(action);
+                    return !!action && !_isCacheableAction(action);
                 };
                 var _storageFor = function (kind) {
                     try {
-                        if (kind === 'local' && typeof window.localStorage !== 'undefined') return window.localStorage;
-                        if (kind === 'session' && typeof window.sessionStorage !== 'undefined') return window.sessionStorage;
+                        if (kind === 'local') return window.localStorage;
+                        if (kind === 'session') return window.sessionStorage;
                     } catch (e) { }
                     return null;
                 };
                 var _hash = function (text) {
-                    var str = String(text || '');
-                    var hash = 5381;
-                    for (var i = 0; i < str.length; i++) {
-                        hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
-                    }
+                    var str = String(text || ''), hash = 5381;
+                    for (var i = 0; i < str.length; i++) hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
                     return (hash >>> 0).toString(36);
                 };
                 var _cacheKey = function (url, init) {
-                    var body = (init && typeof init.body === 'string') ? init.body : '';
-                    return String(url || '') + '::' + body;
+                    return String(url || '') + '::' + ((init && typeof init.body === 'string') ? init.body : '');
                 };
                 var _persistentCacheKey = function (action, url, init) {
                     return _cachePrefix + String(action || 'unknown') + '::' + _hash(_cacheKey(url, init));
@@ -261,28 +228,25 @@
                     var headersObj = {};
                     try {
                         res.headers.forEach(function (v, k) {
-                            if (k === 'content-type' || k === 'x-api-contract' || k === 'cache-control' || k === 'x-request-id') headersObj[k] = v;
+                            if (['content-type','x-api-contract','cache-control','x-request-id'].indexOf(k) !== -1) headersObj[k] = v;
                         });
                     } catch (e) { }
                     if (!headersObj['content-type']) headersObj['content-type'] = 'application/json; charset=utf-8';
                     return { status: res.status, statusText: res.statusText || '', headers: headersObj, body: text };
                 };
                 var _toResponse = function (p) {
-                    return new Response(p.body, { status: p.status, statusText: p.statusText || '', headers: p.headers || { 'content-type': 'application/json; charset=utf-8' } });
+                    return new Response(p.body, {
+                        status: p.status, statusText: p.statusText || '',
+                        headers: p.headers || { 'content-type': 'application/json; charset=utf-8' }
+                    });
                 };
                 var _cacheGet = function (key) {
-                    var now = Date.now();
                     var e = _cacheMem.get(key);
-                    if (!e) return null;
-                    if (!e.exp || e.exp < now) {
-                        _cacheMem.delete(key);
-                        return null;
-                    }
+                    if (!e || !e.exp || e.exp < Date.now()) { _cacheMem.delete(key); return null; }
                     return e.payload || null;
                 };
                 var _cacheSet = function (key, ttlMs, payload) {
-                    if (!key || !ttlMs || !payload) return;
-                    _cacheMem.set(key, { exp: Date.now() + ttlMs, payload: payload });
+                    if (key && ttlMs && payload) _cacheMem.set(key, { exp: Date.now() + ttlMs, payload: payload });
                 };
                 var _cacheClear = function () {
                     try { _cacheMem.clear(); } catch (e) { }
@@ -311,52 +275,40 @@
                             return null;
                         }
                         return parsed.payload || null;
-                    } catch (e) {
-                        return null;
-                    }
+                    } catch (e) { return null; }
                 };
                 var _storageSet = function (action, url, init, ttlMs, payload) {
                     try {
                         var meta = _actionMeta[action];
                         if (!meta || !meta.storage || meta.storage === 'memory') return;
                         var store = _storageFor(meta.storage);
-                        if (!store) return;
-                        store.setItem(_persistentCacheKey(action, url, init), JSON.stringify({
-                            exp: Date.now() + ttlMs,
-                            payload: payload
-                        }));
+                        if (store) store.setItem(_persistentCacheKey(action, url, init), JSON.stringify({ exp: Date.now() + ttlMs, payload: payload }));
                     } catch (e) { }
                 };
                 var _calcDelay = function (attempt) {
                     var base = Math.min(8000, 250 * Math.pow(2, attempt - 1));
-                    var jitter = Math.round(base * (0.6 + Math.random() * 0.8));
-                    return jitter;
+                    return Math.round(base * (0.6 + Math.random() * 0.8));
                 };
                 var _fetchWithTimeout = async function (input, init, timeoutMs) {
-                    var controller = null;
-                    var timeoutId = null;
                     var opts = init ? Object.assign({}, init) : {};
+                    var timeoutId = null;
                     if (!opts.signal && typeof AbortController !== 'undefined') {
-                        controller = new AbortController();
-                        opts.signal = controller.signal;
-                        timeoutId = setTimeout(function () { controller.abort(); }, timeoutMs);
+                        var ctrl = new AbortController();
+                        opts.signal = ctrl.signal;
+                        timeoutId = setTimeout(function () { ctrl.abort(); }, timeoutMs);
                     }
-                    try {
-                        return await _nativeFetch(input, opts);
-                    } finally {
-                        if (timeoutId) clearTimeout(timeoutId);
-                    }
+                    try { return await _nativeFetch(input, opts); }
+                    finally { if (timeoutId) clearTimeout(timeoutId); }
                 };
                 var _fetchWithRetry = async function (input, init) {
                     var url = _getUrl(input);
                     var canRetry = _isRetryableRequest(input, init);
                     var maxAttempts = canRetry ? 4 : 1;
-                    var timeoutMs = 20000;
                     var lastErr = null;
                     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
                         try {
-                            var res = await _fetchWithTimeout(input, init, timeoutMs);
-                            if (res && (!res.ok) && canRetry && _isRetryableStatus(res.status) && attempt < maxAttempts) {
+                            var res = await _fetchWithTimeout(input, init, 20000);
+                            if (res && !res.ok && canRetry && _isRetryableStatus(res.status) && attempt < maxAttempts) {
                                 _markStat('retry_replays', _parseAction(init));
                                 await _sleep(_calcDelay(attempt));
                                 continue;
@@ -369,26 +321,22 @@
                                 await _sleep(_calcDelay(attempt));
                                 continue;
                             }
-                            var e = new Error('Backend unreachable: ' + (url || '(unknown url)') + ' :: ' + String(lastErr || err));
-                            e.cause = lastErr || err;
-                            throw e;
+                            throw new Error('Backend unreachable: ' + url + ' :: ' + String(err));
                         }
                     }
-                    throw lastErr || new Error('Backend unreachable: ' + (url || '(unknown url)'));
+                    throw lastErr || new Error('Backend unreachable: ' + url);
                 };
+
                 window.__CEPAT_FETCH_WRAPPED__ = true;
                 window.fetch = function (input, init) {
                     var url = _getUrl(input);
                     if (_isScriptTarget(url)) {
-                        var method = (init && init.method ? String(init.method) : (input && input.method ? String(input.method) : 'GET')).toUpperCase();
+                        var method = (init && init.method ? String(init.method) : 'GET').toUpperCase();
                         var action = _parseAction(init);
                         if (method === 'POST' && _isCacheableAction(action)) {
                             var k = _cacheKey(url, init);
                             var hit = _cacheGet(k);
-                            if (hit) {
-                                _markStat('memory_cache_hits', action);
-                                return Promise.resolve(_toResponse(hit));
-                            }
+                            if (hit) { _markStat('memory_cache_hits', action); return Promise.resolve(_toResponse(hit)); }
                             var storageHit = _storageGet(action, url, init);
                             if (storageHit) {
                                 _cacheSet(k, Number(_actionTtl[action] || 0), storageHit);
@@ -397,7 +345,7 @@
                             }
                             if (_pendingReq.has(k)) {
                                 _markStat('deduped_requests', action);
-                                return _pendingReq.get(k).then(function (payload) { return _toResponse(payload); });
+                                return _pendingReq.get(k).then(function (p) { return _toResponse(p); });
                             }
                             var ttl = Number(_actionTtl[action] || 0);
                             _markStat('network_requests', action);
@@ -405,10 +353,7 @@
                             var p = _fetchWithRetry(input, init)
                                 .then(async function (res) {
                                     var payload = await _responsePayload(res.clone());
-                                    if (res.ok && ttl > 0) {
-                                        _cacheSet(k, ttl, payload);
-                                        _storageSet(action, url, init, ttl, payload);
-                                    }
+                                    if (res.ok && ttl > 0) { _cacheSet(k, ttl, payload); _storageSet(action, url, init, ttl, payload); }
                                     return payload;
                                 })
                                 .finally(function () { _pendingReq.delete(k); });
@@ -439,11 +384,7 @@
                         var res = await window.fetch(endpoint, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                action: 'batch',
-                                requests: items,
-                                allow_partial: !!(options && options.allow_partial)
-                            })
+                            body: JSON.stringify({ action: 'batch', requests: items, allow_partial: !!(options && options.allow_partial) })
                         });
                         var payload = await res.json();
                         try {
@@ -454,15 +395,10 @@
                                     var ttl = Number(_actionTtl[action] || 0);
                                     if (!action || !ttl || !_isCacheableAction(action)) return;
                                     if (!entry || !entry.data || entry.data.status !== 'success') return;
-                                    var syntheticInit = { method: 'POST', body: JSON.stringify(req) };
-                                    var syntheticPayload = {
-                                        status: 200,
-                                        statusText: 'OK',
-                                        headers: { 'content-type': 'application/json' },
-                                        body: JSON.stringify(entry.data)
-                                    };
-                                    _cacheSet(_cacheKey(endpoint, syntheticInit), ttl, syntheticPayload);
-                                    _storageSet(action, endpoint, syntheticInit, ttl, syntheticPayload);
+                                    var si = { method: 'POST', body: JSON.stringify(req) };
+                                    var sp = { status: 200, statusText: 'OK', headers: { 'content-type': 'application/json' }, body: JSON.stringify(entry.data) };
+                                    _cacheSet(_cacheKey(endpoint, si), ttl, sp);
+                                    _storageSet(action, endpoint, si, ttl, sp);
                                 });
                             }
                         } catch (e) { }
@@ -472,76 +408,61 @@
 
                 // --- PUBLIC CACHE STATE ---
                 try {
-                    var _publicCacheStateKey = 'cepat_public_cache_state_v1';
-                    var _publicCacheStateMaxAge = 5 * 1000;
-                    var _publicCacheScopes = ['settings', 'catalog', 'pages', 'dashboard'];
-                    var _normalizePublicCacheState = function (state) {
-                        var src = (state && typeof state === 'object') ? state : {};
-                        var out = {};
-                        _publicCacheScopes.forEach(function (scope) {
-                            var value = Number(src[scope] || 0);
-                            out[scope] = value > 0 ? String(value) : '';
-                        });
+                    var _pcsKey = 'cepat_public_cache_state_v1';
+                    var _pcsMaxAge = 5 * 1000;
+                    var _pcsScopes = ['settings', 'catalog', 'pages', 'dashboard'];
+                    var _normPCS = function (state) {
+                        var src = (state && typeof state === 'object') ? state : {}, out = {};
+                        _pcsScopes.forEach(function (s) { var v = Number(src[s] || 0); out[s] = v > 0 ? String(v) : ''; });
                         return out;
                     };
-                    var _readPublicCacheState = function () {
+                    var _readPCS = function () {
                         try {
                             var store = _storageFor('local');
                             if (!store) return null;
-                            var raw = store.getItem(_publicCacheStateKey);
+                            var raw = store.getItem(_pcsKey);
                             if (!raw) return null;
                             var parsed = JSON.parse(raw);
-                            if (!parsed || typeof parsed !== 'object' || !parsed.data) return null;
-                            parsed.data = _normalizePublicCacheState(parsed.data);
+                            if (!parsed || !parsed.data) return null;
+                            parsed.data = _normPCS(parsed.data);
                             parsed.time = Number(parsed.time || 0);
-                            if (!isFinite(parsed.time)) parsed.time = 0;
                             return parsed;
-                        } catch (e) {
-                            return null;
-                        }
+                        } catch (e) { return null; }
                     };
-                    var _syncPublicCacheState = function (state, timestamp) {
-                        var payload = {
-                            data: _normalizePublicCacheState(state),
-                            time: Number(timestamp || Date.now())
-                        };
+                    var _syncPCS = function (state, timestamp) {
+                        var payload = { data: _normPCS(state), time: Number(timestamp || Date.now()) };
                         try {
                             var store = _storageFor('local');
-                            if (store) store.setItem(_publicCacheStateKey, JSON.stringify(payload));
+                            if (store) store.setItem(_pcsKey, JSON.stringify(payload));
                         } catch (e) { }
                         return payload;
                     };
                     window.CEPAT_CACHE_STATE = {
-                        key: _publicCacheStateKey,
-                        maxAge: _publicCacheStateMaxAge,
-                        cached: _readPublicCacheState(),
+                        key: _pcsKey,
+                        maxAge: _pcsMaxAge,
+                        cached: _readPCS(),
                         isFresh: false,
                         getCached: function () {
-                            this.cached = _readPublicCacheState();
+                            this.cached = _readPCS();
                             this.isFresh = !!(this.cached && this.cached.time && (Date.now() - this.cached.time <= this.maxAge));
                             return this.cached;
                         },
                         sync: function (state, timestamp) {
-                            this.cached = _syncPublicCacheState(state, timestamp);
+                            this.cached = _syncPCS(state, timestamp);
                             this.isFresh = true;
                             return this.cached.data;
                         },
                         getVersion: function (scope) {
-                            var cached = this.getCached();
-                            if (!cached || !cached.data) return '';
-                            return String(cached.data[String(scope || '').trim().toLowerCase()] || '');
+                            var c = this.getCached();
+                            return c && c.data ? String(c.data[String(scope || '').toLowerCase()] || '') : '';
                         },
                         ensureFresh: async function (opts) {
-                            var options = opts && typeof opts === 'object' ? opts : {};
+                            var options = opts || {};
                             var maxAgeMs = Math.max(0, Number(options.maxAgeMs || this.maxAge || 0));
                             var cached = this.getCached();
-                            if (!options.force && cached && cached.data && cached.time && (Date.now() - cached.time <= maxAgeMs)) {
-                                return cached.data;
-                            }
+                            if (!options.force && cached && cached.data && cached.time && (Date.now() - cached.time <= maxAgeMs)) return cached.data;
                             var endpoint = window.API_URL || window.SCRIPT_URL || null;
-                            if (!endpoint || typeof window.fetch !== 'function') {
-                                return cached && cached.data ? cached.data : null;
-                            }
+                            if (!endpoint) return cached && cached.data ? cached.data : null;
                             try {
                                 var res = await window.fetch(endpoint, {
                                     method: 'POST',
@@ -549,9 +470,7 @@
                                     body: JSON.stringify({ action: 'get_public_cache_state' })
                                 });
                                 var payload = await res.json();
-                                if (payload && payload.status === 'success' && payload.data) {
-                                    return this.sync(payload.data, Date.now());
-                                }
+                                if (payload && payload.status === 'success' && payload.data) return this.sync(payload.data, Date.now());
                             } catch (e) { }
                             return cached && cached.data ? cached.data : null;
                         }
